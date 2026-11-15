@@ -26,6 +26,7 @@
 | us | 纯大写 ticker | `AAPL` | Yahoo/Stooq 原生形即规范形 |
 | cn | `NNNNNN.SH` / `NNNNNN.SZ` | `600519.SH`、`000001.SZ` | 大陆通行写法；裸 6 位数字为宽容输入（按首位推断：6/9→SH，0/3→SZ；北交所 4/8 暂不支持） |
 | hk | `NNNNN.HK`（5 位补零） | `00700.HK` | 裸 1-5 位数字为宽容输入（`700` → `00700.HK`） |
+| ru | `TICKER.MOEX` | `SBER.MOEX`、`GAZP.MOEX` | MOEX 股票的 provider-independent 规范形；Finam 原生 `SBER@MISX` / `GAZP@MISX` 只存在于 connector 内部，MIC `MISX` 映射为 `.MOEX` |
 | futures | `VARIANTNNNN.EXCHANGE`（品种大写 + 3-4 位年月 + 交易所后缀） | `RB2601.SHF`、`IF2612.CFE`、`IC2609.CFE` | 同花顺 thscode 形；后缀 SHF/INE=上期所/能源中心，DCE=大期所，CZC=郑商所，GFE=广期所，CFE=中金所；主力连续 `RB00.SHF` 由上游检索返回；中金所 8888 加权码（`IF8888.CFE` 等）上游目录登记但行情端点不供数，连接器列表/检索已剔除（2026-09-14） |
 | global | 上游原生大写代码 | `XAUUSD`、`USOIL`、`USDJPY`、`SPX` | 金十数据原生形即规范形（现货贵金属/原油/铜、外汇、全球与 A 股指数共 97 个品种）；代码表经 `quote://codes` 动态全集注入，检索未命中时以原始大写形透传交上游裁决 |
 
@@ -53,6 +54,7 @@
 | hithink | futures | `RB2601.SHF` | 近恒等：大写去空白透传（带/不带后缀均交上游裁决，品种→交易所映射不做本地硬编码，检索/代码表返回即规范形） |
 | hithink | cn | `600519.SH` | `normalizeThsCode`：裸 6 位按首位推断 SH/SZ/BJ，`sh600519` 前缀形互译 |
 | futu | us | `US.AAPL` | 规范形纯大写 ticker（接受 `US.AAPL` / `AAPL.US` / 类别股 `BRK.B`）↔ wire `US.AAPL` |
+| finam | ru | `SBER@MISX` / `GAZP@MISX` | `SBER.MOEX` / `GAZP.MOEX` ↔ native `TICKER@MISX`；未知 MIC、未知 market suffix 或 malformed symbol 均 fail-closed，返回 `TRADING_UNSUPPORTED_SYMBOL` |
 | jin10 | global | `XAUUSD` | 恒等（原生大写即规范形）；输入 trim + 大写化，未登记代码交 `get_quote` 裁决（未知品种报 `TRADING_UNSUPPORTED_SYMBOL`） |
 | xysz | cn | `600519.SH`（AmazingData code+market 形即规范形） | 近恒等：接受规范形 / 裸 6 位 / `sh600519` 前缀形；输出恒为规范形。裸 6 位按首位推断 SH/SZ/BJ（6/9→SH，0/2/3→SZ，4/8→BJ）；港股与加密形态显式拒绝（fail-closed） |
 

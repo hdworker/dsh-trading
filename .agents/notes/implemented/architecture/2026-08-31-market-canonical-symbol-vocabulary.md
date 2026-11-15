@@ -16,7 +16,7 @@ OKX invalid instId`。根因是架构缺口：api 契约从未定义市场级规
 立规 `docs/guides/symbol-vocabulary.md`（规范先行，用户裁决「先做规范再按规范修复」）：
 
 1. **消费方只说规范形**：crypto=`BTCUSDT`（大写无分隔，多数派词汇）、us=`AAPL`、
-   cn=`600519.SH`、hk=`00700.HK`（5 位补零）；衍生品 `-SWAP` 后缀为永续规范形（2026-10-08 落地，见 Consequences）。
+   cn=`600519.SH`、hk=`00700.HK`（5 位补零）、ru=`TICKER.MOEX`；衍生品 `-SWAP` 后缀为永续规范形（2026-10-08 落地，见 Consequences）。
 2. **连接器 REST 边界互译，输入宽容、输出规范**：
    - okx：`normalizeOkxSymbol`（规范形按已知 quote 后缀表最长匹配拆 base/quote；
      横杠数消歧——`X-SWAP` 单横杠必为规范 SWAP，因无 quote 货币叫 SWAP；
@@ -25,6 +25,7 @@ OKX invalid instId`。根因是架构缺口：api 契约从未定义市场级规
    - tencent：cn 接受 `600519.SH`（后缀优先于首位推断）/hk 接受 `00700.HK`；
      ticker 输出由请求时 wire 前缀还原规范形（响应体 fields[2] 只是裸代码）。
    - stooq：输出剥 `.US` 后缀（us 规范形无后缀）。binance/yahoo 原生即规范，不动。
+    - finam：`TICKER.MOEX` ↔ `TICKER@MISX`；MOEX canonical suffix 与 Finam MIC 的映射只在 connector-local seam 实现。
 3. **错误语义**：`TRADING_UNSUPPORTED_SYMBOL` 只用于所有已知词汇都解析不出或产品
    形态不支持；「不是我家方言」不再报错。
 4. 知识下沉：api 契约注释挂规范、connector-playbook §3 加符号词汇行、README 定稿 #10、

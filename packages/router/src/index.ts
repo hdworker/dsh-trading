@@ -68,6 +68,7 @@ export const PROVIDER_VOCABULARY = [
   'stooq',
   'alpaca',
   'fmp',
+  'finam',
   'finnhub',
   'polygon',
   'ibkr',
@@ -123,6 +124,8 @@ export const DEFAULT_MARKETS: Record<string, MarketProviderEntry> = {
   us: { provider: 'yahoo' },
   cn: { provider: 'tencent' },
   hk: { provider: 'tencent' },
+  // MOEX/Finam（第一版只读行情；无交易面）。
+  ru: { provider: 'finam' },
   // 期货（issue #97）：唯一 provider 为同花顺（日K + 当日分时；无实盘交易面）。
   futures: { provider: 'hithink' },
   // 全球品种（2026-09-13 金十接入）：唯一 provider 为金十数据 MCP（分钟K + 报价 +

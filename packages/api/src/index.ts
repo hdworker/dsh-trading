@@ -766,6 +766,13 @@ export interface MarketDataService {
    */
   listInstruments?(): Promise<InstrumentRef[]>
   /**
+   * 有界的本市场标的检索（GUI 搜索用）。
+   *
+   * `listInstruments()` 仍是完整 universe；实现方可以只在这里提供 query/limit
+   * 优化，消费方不得把本方法当作完整名册。返回的 symbol 仍必须是市场规范词汇。
+   */
+  searchInstruments?(query: string, limit?: number): Promise<InstrumentRef[]>
+  /**
    * 标的基本面与估值快照（GUI「基本面」页签用，2026-09-02）。
    * 可选方法：仅当数据源在同一公共端点里携带基本面字段时实现
    * （腾讯行情行 cn/hk 已实现）；未实现的市场由消费方降级为派生数据（日K 52 周高低）。
@@ -979,6 +986,8 @@ declare module '@deepseek-ai/cordis' {
     tradingFuturesMarketData: MarketDataService
     /** 全球品种行情（global 市场：大宗/外汇/海外指数；@dshtrading/connector-jin10 dataplane 行提供）。 */
     tradingGlobalMarketData: MarketDataService
+    /** 俄罗斯/莫斯科交易所行情（ru 市场；Finam dataplane 行提供）。 */
+    tradingRuMarketData: MarketDataService
     /**
      * crypto 市场交易服务（R3 2026-08-29 补齐，crypto 市场第一个真实 TradeService）：
      * 由 connector-okx 实现（签名 demo/live 下单），与 connector-binance 经

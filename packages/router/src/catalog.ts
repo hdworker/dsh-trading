@@ -15,7 +15,7 @@
 import { instrumentFormOf, type InstrumentAssetClass, type InstrumentForm } from '@dshtrading/api'
 
 /** 市场词汇（与 api MarketId 同词汇；本地定义保持本模块零依赖）。 */
-export type CatalogMarket = 'crypto' | 'us' | 'cn' | 'hk' | 'futures' | 'global'
+export type CatalogMarket = 'crypto' | 'us' | 'cn' | 'hk' | 'ru' | 'futures' | 'global'
 
 export interface CatalogEntry {
   symbol: string
@@ -314,6 +314,8 @@ export const SYMBOL_CATALOG: Record<CatalogMarket, CatalogEntry[]> = {
     { symbol: '00316.HK', name: '东方海外国际', pinyin: 'DFHW,DONGFA' },
     { symbol: '00669.HK', name: '创科实业', pinyin: 'CKSY,CHUANGKE' },
   ],
+  // Finam/MOEX 无静态种子；完整活动股票目录由连接器动态注入。
+  ru: [],
   // 期货无静态种子（合约有到期日），代码表经连接器 listInstruments 动态全集注入。
   futures: [],
   // 全球品种同样零静态种子：代码表（97 个品种）经金十 quote://codes 动态全集注入
@@ -430,7 +432,7 @@ export interface Suggestion extends CatalogEntry {
 export function searchAllMarkets(query: string, limit = 8, form?: InstrumentForm): Suggestion[] {
   const q = query.trim().toUpperCase()
   if (q === '') return []
-  const markets: CatalogMarket[] = ['crypto', 'us', 'cn', 'hk', 'futures', 'global']
+  const markets: CatalogMarket[] = ['crypto', 'us', 'cn', 'hk', 'ru', 'futures', 'global']
   const all: Array<{ entry: Suggestion; score: number }> = []
   for (const market of markets) {
     const catalog = getMergedCatalog(market)
