@@ -1,0 +1,39 @@
+{
+  "name": "@dshtrading/ru",
+  "description": "Finam/MOEX market bundle for dsh-trading: host-only ru provider registration with no agent preset in the first slice",
+  "version": "0.7.1",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml"
+  ],
+  "license": "PolyForm-Noncommercial-1.0.0",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "@dshtrading/connector-finam": "workspace:*"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": ">=4.1.0",
+    "@deepseek-ai/schemastery": ">=3.19.0"
+  },
+  "devDependencies": {
+    "tsdown": "^0.22.0"
+  }
+}

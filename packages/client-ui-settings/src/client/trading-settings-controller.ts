@@ -69,6 +69,7 @@ export const PROVIDER_LABELS: readonly Readonly<ProviderMeta>[] = [
   { id: 'tiger', label: 'provider.tiger', url: 'https://developer.itigerup.com', env: 'TIGER_ID', type: 'commercial', markets: ['hk'] },
   { id: 'jin10', label: 'provider.jin10', url: 'https://mcp.jin10.com', env: 'JIN10_MCP_TOKEN', type: 'public', markets: ['global'] },
   { id: 'hithink', label: 'provider.hithink', url: 'https://fuyao.aicubes.cn', env: 'HITHINK_FINANCE_API_KEY', type: 'commercial', markets: ['cn', 'futures'] },
+  { id: 'finam', label: 'provider.finam', url: 'https://api.finam.ru', env: 'FINAM_API_SECRET', type: 'commercial', markets: ['ru'] },
   { id: 'xysz', label: 'provider.xysz', url: 'https://www.chinastock.com.cn', configField: 'apiUrl', type: 'commercial', markets: ['cn'] },
 ]
 
@@ -174,6 +175,9 @@ export const PROVIDER_CREDENTIAL_SPECS: Record<string, readonly CredentialField[
   ],
   hithink: [
     { key: 'apiKey', label: 'field.label.apiKey', placeholder: 'HITHINK_FINANCE_API_KEY', secret: true },
+  ],
+  finam: [
+    { key: 'secret', label: 'field.label.finamSecret', placeholder: 'field.placeholder.finamSecret', secret: true },
   ],
 }
 

@@ -1,0 +1,14 @@
+# @dshtrading/ru — host-only MOEX/Finam bundle patch.
+#
+# The first slice has no agent preset or kit. The bundle owns the host dataplane
+# row and enables it; the connector schema keeps the secret reference explicit.
+- insert:
+    - id: dsh-trading-ru-installer
+      name: '@dshtrading/ru'
+
+    - id: dsh-trading-ru-dataplane-finam
+      name: '@dshtrading/connector-finam/dataplane'
+      inject: ['tradingMarketDataRegistry']
+      config:
+        enabled: true
+        secretRef: FINAM_API_SECRET

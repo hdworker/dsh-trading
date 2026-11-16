@@ -30,7 +30,7 @@ Status: implemented
    - 连接器优先读取 `tradingMarketRouter.getCredential(provider)`；
    - 未在 UI 配置或清除后自动回退至环境变量 `process.env[ref]`；
    - 这是**面板字段真有消费点**的那些 provider 的现状（okx / alpaca / fmp / finnhub / polygon /
-     tushare / longbridge / tiger / jin10 / hithink，其中 longbridge 与 tiger 的读点于 2026-10-15 补齐）；
+     tushare / longbridge / tiger / jin10 / hithink / finam，其中 longbridge 与 tiger 的读点于 2026-10-15 补齐；finam 的 settings key 是 `secret`，host 读取点为 `tradingMarketRouter.getCredential('finam')?.secret`，并以 `FINAM_API_SECRET` 作 env fallback；
      其余 provider 的字段自同日撤下——面板键无人读即不该出现在 UI 上（清单与证据见上面那份记录）。
 
 

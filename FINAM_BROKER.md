@@ -57,6 +57,8 @@
 - `packages/ru/package.json` — new market bundle with explicit connector dependency.
 - `packages/ru/cordis.patch.yml` — host dataplane row for Finam.
 - `packages/ru/src/index.ts` — minimal bundle plugin entry; first slice is host-plane only and does not install an agent preset.
+- `packages/ru/tsdown.config.ts` — package build entry.
+- `packages/ru/test/bundle-wiring.test.ts` — bundle/patch row contract.
 
 ### Modify
 
@@ -178,6 +180,10 @@ The current code intentionally exposes an active-MISX catalog, not a claimed “
 
 ## Task 3: Register Finam in a `ru` market bundle
 
+**Status: offline implementation complete; runtime/profile install remains gated by the SDK registry gap.**
+
+The ru bundle, host patch, registry dataplane and generic settings metadata are implemented. The settings UI reuses the existing `dshtrading` form: provider route and secret credential are separate writes, with `FINAM_API_SECRET` only a host fallback/reference. No Finam-specific browser component or agent preset was added.
+
 **Files:**
 - Create: `packages/ru/package.json`
 - Create: `packages/ru/cordis.patch.yml`
@@ -201,12 +207,12 @@ The current code intentionally exposes an active-MISX catalog, not a claimed “
 5. Add settings tests for provider registration (`ru` only), `FINAM_API_SECRET` metadata, redacted/configured credential state, settings-over-env precedence and missing-secret fail-closed behavior. Add a dataplane test proving the selected `finam` service is the only `ru` market-data registration and no trade registration exists.
 6. Acceptance requires the settings card to show Finam only under the ru/Finam market tab, persist route and credential independently, and report unavailable credentials honestly without making `/markets` appear active when the bundle is absent.
 
-- [ ] **Step 1: Add failing loader tests** for missing `Config` defaults, provider registration and `enabled=false`.
-- [ ] **Step 2: Run the focused bundle tests and confirm failure.**
-- [ ] **Step 3: Generate the connector shape from `scripts/new-connector.mjs` conventions and add the explicit `ru` host dataplane row.**
-- [ ] **Step 4: Register `ru/finam` with cleanup on unload and preserve the existing router no-fallback rule.**
-- [ ] **Step 5: Add the provider label and `FINAM_API_SECRET` reference to the existing settings controller without exposing the secret value to client code.**
-- [ ] **Step 6: Run `pnpm connector-dataplane:check` and the focused bundle/settings tests.**
+- [x] **Step 1: Add failing loader tests** for missing `Config` defaults, provider registration and `enabled=false`.
+- [x] **Step 2: Run the focused bundle tests and confirm failure.**
+- [x] **Step 3: Add the explicit `ru` host dataplane row** following the existing market-bundle/connector conventions; no agent preset is installed.
+- [x] **Step 4: Register `ru/finam` with cleanup on unload** and preserve the existing router no-fallback rule.
+- [x] **Step 5: Add the provider label, credential spec and `FINAM_API_SECRET` host reference** without exposing the secret value to client code.
+- [x] **Step 6: Run the direct connector-dataplane gate and focused bundle/settings tests.**
 
 ## Task 4: Expose `/markets` and `/symbols` to the client
 

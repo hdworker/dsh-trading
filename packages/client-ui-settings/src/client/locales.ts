@@ -77,6 +77,7 @@ export type SettingsLocaleKey =
   | 'market.hk'
   | 'market.futures'
   | 'market.global'
+   | 'market.ru'
   | 'credential.btn'
   | 'credential.btnFold'
   | 'credential.configured'
@@ -115,6 +116,7 @@ export type SettingsLocaleKey =
   | 'provider.longbridge'
   | 'provider.tiger'
   | 'provider.hithink'
+   | 'provider.finam'
   | 'provider.jin10'
   | 'provider.xysz'
   | 'field.label.apiKey'
@@ -126,6 +128,7 @@ export type SettingsLocaleKey =
   | 'field.label.appSecret'
   | 'field.label.accessToken'
   | 'field.label.tigerPrivateKey'
+   | 'field.label.finamSecret'
   | 'field.placeholder.okxKey'
   | 'field.placeholder.okxSecret'
   | 'field.placeholder.okxPassphrase'
@@ -139,6 +142,7 @@ export type SettingsLocaleKey =
   | 'field.placeholder.longbridgeAppSecret'
   | 'field.placeholder.longbridgeAccessToken'
   | 'field.placeholder.tigerPrivateKey'
+   | 'field.placeholder.finamSecret'
 
 export const zh: Record<SettingsLocaleKey, string> = {
       'nav': '交易',
@@ -208,6 +212,7 @@ export const zh: Record<SettingsLocaleKey, string> = {
       'market.hk': '香港股票',
       'market.futures': '期货',
       'market.global': '全球',
+       'market.ru': 'Finam',
       'credential.btn': '配置 API 凭证',
       'credential.btnFold': '收起配置',
       'credential.configured': '已配置凭证',
@@ -246,6 +251,7 @@ export const zh: Record<SettingsLocaleKey, string> = {
       'provider.longbridge': 'Longbridge (长桥)',
       'provider.tiger': 'Tiger Trade (老虎证券)',
       'provider.hithink': '同花顺',
+       'provider.finam': 'Finam Trade API',
       'provider.jin10': '金十数据',
       'provider.xysz': '银河星耀数智 (AmazingData)',
       'field.label.apiKey': 'API Key',
@@ -257,6 +263,7 @@ export const zh: Record<SettingsLocaleKey, string> = {
       'field.label.appSecret': 'App Secret',
       'field.label.accessToken': 'Access Token',
       'field.label.tigerPrivateKey': 'RSA 私钥',
+       'field.label.finamSecret': 'Finam API Secret',
       'field.placeholder.okxKey': 'OKX_API_KEY (留空走免密公共行情)',
       'field.placeholder.okxSecret': 'OKX_SECRET_KEY',
       'field.placeholder.okxPassphrase': 'OKX_PASSPHRASE',
@@ -270,6 +277,7 @@ export const zh: Record<SettingsLocaleKey, string> = {
       'field.placeholder.longbridgeAppSecret': 'LONGBRIDGE_APP_SECRET',
       'field.placeholder.longbridgeAccessToken': 'LONGBRIDGE_ACCESS_TOKEN',
       'field.placeholder.tigerPrivateKey': 'TIGER_PRIVATE_KEY',
+       'field.placeholder.finamSecret': 'FINAM_API_SECRET (host fallback)',
 }
 
 export const en: Record<SettingsLocaleKey, string> = {
@@ -340,6 +348,7 @@ export const en: Record<SettingsLocaleKey, string> = {
       'market.hk': 'Hong Kong',
       'market.futures': 'Futures',
       'market.global': 'Global',
+       'market.ru': 'Finam',
       'credential.btn': 'Configure API Credentials',
       'credential.btnFold': 'Hide Configuration',
       'credential.configured': 'Configured',
@@ -378,6 +387,7 @@ export const en: Record<SettingsLocaleKey, string> = {
       'provider.longbridge': 'Longbridge',
       'provider.tiger': 'Tiger Trade',
       'provider.hithink': 'HiThink',
+       'provider.finam': 'Finam Trade API',
       'provider.jin10': 'Jin10',
       'provider.xysz': 'China Galaxy XYSZ (AmazingData)',
       'field.label.apiKey': 'API Key',
@@ -389,6 +399,7 @@ export const en: Record<SettingsLocaleKey, string> = {
       'field.label.appSecret': 'App Secret',
       'field.label.accessToken': 'Access Token',
       'field.label.tigerPrivateKey': 'RSA private key',
+       'field.label.finamSecret': 'Finam API secret',
       'field.placeholder.okxKey': 'OKX_API_KEY (leave empty for public quotes)',
       'field.placeholder.okxSecret': 'OKX_SECRET_KEY',
       'field.placeholder.okxPassphrase': 'OKX_PASSPHRASE',
@@ -402,4 +413,5 @@ export const en: Record<SettingsLocaleKey, string> = {
       'field.placeholder.longbridgeAppSecret': 'LONGBRIDGE_APP_SECRET',
       'field.placeholder.longbridgeAccessToken': 'LONGBRIDGE_ACCESS_TOKEN',
       'field.placeholder.tigerPrivateKey': 'TIGER_PRIVATE_KEY',
+       'field.placeholder.finamSecret': 'FINAM_API_SECRET (host fallback)',
 }
