@@ -57,6 +57,7 @@ OKX invalid instId`。根因是架构缺口：api 契约从未定义市场级规
   `form`，行情方法**不新增 form 形参**（后缀即形态）。Binance 现货与永续交易所侧同形
   （`BTCUSDT`）的歧义由名册 `form` 裁决端点（`/api/v3` vs `/fapi/v1`），`-SWAP`↔原生形映射归
   Binance 连接器。`form` 与符号不一致时报 `TRADING_UNSUPPORTED_SYMBOL`，不静默纠正。
+- Finam v1 的名册只信官方 `isArchived` 与 `mic=MISX`，不按未定义的 `Asset.type` 字符串猜股票/ETF，也不调用需要 accountId 的 `GetAssetParams` 伪造“可交易”判定；严格 tradable-equity universe 等待官方证据。
 - TradFi 永续（OKX `TSLAUSDT-SWAP` 等 USDT 本位合成合约）与 jin10 `global` 的 `XAUUSD`
   （现货贵金属报价）是两个产品，各自独立、不合并、不互相映射。
 - 验证：okx 66+2 skipped（互译矩阵：规范/原生/小写/垃圾输入/未知 quote 后缀）、

@@ -75,7 +75,10 @@
 - `packages/client-ui-trading/src/client/locales.ts` — add Russian/English labels for `tab.finam`.
 - `packages/client-ui-trading/src/client/store.ts` — allow `ru` in selection/watchlist sanitization and persistence; keep arbitrary host rows compatible with existing open-market semantics.
 - `packages/client-ui-trading/src/client/MarketSidebar.tsx` — include `ru` in dynamic search target markets and add-market cycling; keep tabs driven by `/markets`, not by a hardcoded always-visible Finam tab; do not render the complete market catalog as rows.
-- `packages/client-ui-settings/src/client/trading-settings-controller.ts` and its locale/tests — expose the Finam provider label and `FINAM_API_SECRET` credential reference through the existing settings seam; the secret value remains host-side.
+- `packages/client-ui-settings/src/client/trading-settings-controller.ts` — register Finam provider metadata and the `FINAM_API_SECRET` host-side fallback reference.
+- `packages/client-ui-settings/src/client/MarketProviderPanel.tsx` — reuse the generic provider radio/credential card; no Finam-specific form.
+- `packages/client-ui-settings/src/client/locales.ts` — add `market.ru`, `provider.finam` and the Finam secret field copy in zh/en.
+- `packages/client-ui-settings/test/provider-registration.test.ts` and `credential-consumption.test.ts` — verify ru/finam registration, credential namespace and host-first secret resolution.
 - `packages/watchlist/src/seeds.ts` — add an empty `ru` bucket so agent watchlist output and GUI market fallback use the same market vocabulary without inventing seed tickers.
 - `packages/client-ui-trading/test/market-vocab.test.ts` — `ru` label and symbol normalization.
 - `packages/client-ui-trading/test/market-sidebar.smoke.test.tsx` — Finam tab appears only when `/markets` returns `ru`; query suggestions add/select a canonical Finam symbol.
@@ -134,6 +137,12 @@
 
 ## Task 2: Build the Finam read-only connector
 
+**Status: implementation complete; runtime SDK installation is blocked by upstream package availability.**
+
+The official SDK README and repository source confirm the `@finam/trade-api@2.19.1` interface (`createTradeApi`/`withTradeApi`, `assets.allAssets`, `marketData.lastQuote`, `marketData.bars`). The pinned official checkout at commit `162c579e3ed330722f085dfbda37b961fe8a42c3` was locally generated/type-checked and its exports were verified without copying generated files into this repository. The current npm registry query for that exact package/version returns `ERR_PNPM_FETCH_404`, so the host-runtime install and real network evidence remain pending an accessible published package or approved registry/tarball source.
+
+The current code intentionally exposes an active-MISX catalog, not a claimed “tradable equity” universe: the official 2.19.1 proto has no documented `Asset.type` vocabulary or account-free `isTradable` field. Strict equity/tradability filtering remains an explicit acceptance gap.
+
 **Files:**
 - Create: `packages/connector-finam/package.json`
 - Create: `packages/connector-finam/README.md`
@@ -142,27 +151,30 @@
 - Create: `packages/connector-finam/src/index.ts`
 - Create: `packages/connector-finam/src/dataplane.ts`
 - Test: `packages/connector-finam/test/rest.test.ts`, `dataplane.test.ts`, `connector.test.ts`
+- Research: `docs/guides/finam-sdk-research.md`
 
 **Interfaces:**
 - `FinamMarketDataService implements MarketDataService`.
-- `listInstruments(): Promise<InstrumentRef[]>` returns the complete active MOEX-equity universe with canonical symbols and display names; this is the backend source for `screener_run`.
+- `listInstruments(): Promise<InstrumentRef[]>` returns the complete active-MISX catalog with canonical symbols and display names; strict equity/tradability filtering remains an explicit evidence gap before claiming the screener universe.
 - Optional internal `searchInstruments(query: string, limit: number): Promise<InstrumentRef[]>` serves bounded UI search; it is not the canonical full-catalog interface and must not change watchlist symbols.
 - `getTicker(symbol: string): Promise<Ticker>`.
 - `getKlines(symbol: string, interval: Interval, limit?: number): Promise<Kline[]>`.
 - `subscribeTicker(symbol: string, cb: (ticker: Ticker) => void, options?: { intervalMs?: number }): Disposable`.
 - Optional `getOrderbook` and `getRecentTrades` are exposed only if the official SDK path is verified in the same slice.
 
-- [ ] **Step 1: Add parser/transport tests** with fixtures for paginated assets, native `ticker@mic` request payloads (reusing the completed Task 1 mapping), nested decimal values, timestamps, empty pages, duplicate cursors, 401, 429, 5xx and malformed responses.
-- [ ] **Step 2: Run connector tests to establish the failing REST/service contract; keep the completed symbol mapping tests green.**
-- [ ] **Step 3: Add the pinned official `@finam/trade-api@2.19.1` runtime dependency to the connector/bundle according to existing package conventions; do not vendor generated SDK code.**
-- [ ] **Step 4: Implement credentials through DSH refs**; resolve the long-lived Finam secret only in host-side code and never in client/UI modules.
-- [ ] **Step 5: Implement bounded asset pagination** using `Assets.AllAssets`/equivalent official SDK method, filter active/tradable MOEX equities, call the completed `canonicalFinamSymbol` / `nativeFinamSymbol` mapping from `src/symbol.ts`, preserve native symbols only in connector-local request handling, and reject repeated cursors.
-- [ ] **Step 6: Implement ticker/K-line normalization** with exact numeric parsing, explicit interval mapping, provider timestamps, empty response semantics and `TRADING_*` error mapping.
-- [ ] **Step 7: Implement complete-catalog retrieval** with active/tradable MOEX-equity filtering, stable deduplication and a bounded refresh/cache; this method feeds `screener_run` and is never rendered wholesale by the sidebar.
-- [ ] **Step 8: Implement bounded `searchInstruments(query, limit)`** at the connector/bridge seam; if the SDK only exposes full assets, filter the cached catalog in connector/bridge memory and enforce the result limit.
-- [ ] **Step 9: Implement `klineCapabilities()`** with only intervals/depths verified against Finam documentation/network evidence; do not claim unsupported M1/M5 history.
-- [ ] **Step 10: Implement ticker subscription with cancellation/reconnect boundaries**; do not claim stream reliability until a network spike proves it. A bounded REST polling fallback is acceptable for the first UI slice.
-- [ ] **Step 11: Run focused connector tests and a no-credentials test** confirming secrets are not written to logs or error messages.
+- [x] **Step 1: Add parser/transport tests** with fixtures for paginated assets, native `ticker@mic` request payloads (reusing the completed Task 1 mapping), nested decimal values, timestamps, empty pages, duplicate cursors and malformed responses. Typed error mapping is covered separately; HTTP/network smoke remains blocked by SDK availability.
+- [x] **Step 2: Run connector tests to establish the failing REST/service contract; keep the completed symbol mapping tests green.** Direct Vitest execution is green.
+- [ ] **Step 3: Add and install the pinned official `@finam/trade-api@2.19.1` runtime dependency.** The exact declaration is present in `packages/connector-finam/package.json`, but npm/pnpm currently returns `ERR_PNPM_FETCH_404`.
+- [x] **Step 4: Implement credentials through the host-side ref seam**; resolve `FINAM_API_SECRET` only in host code and never in client/UI modules.
+- [x] **Step 5: Implement bounded asset pagination** using `api.assets.allAssets({ cursor, onlyActive, onlyDisabled })`, canonical mapping, stable cursor guards and active-MISX filtering. Strict equity/tradability filtering remains open because the official proto does not define a safe account-free predicate.
+- [x] **Step 6: Implement ticker/K-line normalization** with exact decimal parsing, official timeframe mapping, provider timestamps, empty response semantics and `TRADING_*` error mapping.
+- [x] **Step 7: Implement active-MISX catalog retrieval** with stable deduplication, bounded refresh/cache and no wholesale UI rendering. Strict equity/tradability filtering remains an evidence gap.
+- [x] **Step 8: Implement bounded `searchInstruments(query, limit)`** over the cached catalog with a hard result limit.
+- [ ] **Step 9: Implement `klineCapabilities()`** only after network evidence verifies timestamp semantics and conservative returned depth. The connector intentionally does not advertise capabilities yet.
+- [x] **Step 10: Implement ticker subscription with cancellation boundaries** using bounded REST polling; no stream reliability claim is made.
+- [x] **Step 11: Run focused connector tests and a no-credentials test**; direct connector tests pass with 18 tests and the hygiene audit reports no new debt.
+
+**Task 2 verification gap:** direct `tsdown` build passes and all offline tests pass, but `pnpm install`/workspace-filtered commands cannot resolve the pinned SDK from the current public npm registry. Real SDK runtime and network evidence must be run once an installable official tarball/registry source is available.
 
 ## Task 3: Register Finam in a `ru` market bundle
 
@@ -179,6 +191,15 @@
 - The minimal `packages/ru/src/index.ts` entry is a no-op bundle plugin; no agent preset is installed in this slice.
 - Dataplane registers `('ru', 'finam', service)` and does not register a trade service in this slice.
 - Default route is disabled unless `markets.ru.provider=finam` and the bundle is installed.
+
+**Settings integration plan (Task 3, existing `dshtrading` seam):**
+
+1. Add `{ id: 'finam', label: 'provider.finam', url: 'https://api.finam.ru', env: 'FINAM_API_SECRET', type: 'commercial', markets: ['ru'] }` to `PROVIDER_LABELS`. The `env` value is a host fallback/reference label, not a browser-side secret.
+2. Add `PROVIDER_CREDENTIAL_SPECS.finam` with one field `{ key: 'secret', secret: true }` (stored under `dshtrading.credentials.finam.secret`), plus zh/en `field.label.finamSecret` / `field.placeholder.finamSecret` copy. Reuse the generic `MarketProviderPanel` credential card; do not create a Finam-specific settings component.
+3. Keep route selection and credentials as separate writes: `setProvider('ru', 'finam')` mutates `markets.ru.provider`; `setCredential('finam', { secret })` writes the host settings credential. Both use the existing revision-fenced `ConfigForm` path.
+4. Resolve credentials host-first in the connector: `router.getCredential('finam')?.secret` → credentials/ref resolver → `process.env[secretRef]`. The value, JWT, account IDs and raw SDK client never cross into client state, URL, watchlist or logs.
+5. Add settings tests for provider registration (`ru` only), `FINAM_API_SECRET` metadata, redacted/configured credential state, settings-over-env precedence and missing-secret fail-closed behavior. Add a dataplane test proving the selected `finam` service is the only `ru` market-data registration and no trade registration exists.
+6. Acceptance requires the settings card to show Finam only under the ru/Finam market tab, persist route and credential independently, and report unavailable credentials honestly without making `/markets` appear active when the bundle is absent.
 
 - [ ] **Step 1: Add failing loader tests** for missing `Config` defaults, provider registration and `enabled=false`.
 - [ ] **Step 2: Run the focused bundle tests and confirm failure.**

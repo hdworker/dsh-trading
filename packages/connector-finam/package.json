@@ -1,0 +1,39 @@
+{
+  "name": "@dshtrading/connector-finam",
+  "description": "Finam/MOEX read-only market-data connector for dsh-trading: canonical ru symbols, ticker, klines and active instrument catalog",
+  "version": "0.7.1",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./dataplane": {
+      "types": "./lib/dataplane.d.ts",
+      "default": "./lib/dataplane.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib"
+  ],
+  "license": "PolyForm-Noncommercial-1.0.0",
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@dshtrading/api": "workspace:^",
+    "@finam/trade-api": "2.19.1"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": ">=4.1.0",
+    "@deepseek-ai/schemastery": ">=3.19.0"
+  },
+  "devDependencies": {
+    "tsdown": "^0.22.0",
+    "vitest": "^3.0.0"
+  }
+}
