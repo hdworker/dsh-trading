@@ -56,9 +56,9 @@ import { TtlCache } from './ttl-cache.ts'
 import { mergeActiveBuyPoints, readActiveBuySnapshots, shanghaiDate, type ActiveBuyWire } from './active-buy.ts'
 
 /** 本桥支持的市场（与连接器服务键一一对应）。 */
-export type MarketId = 'crypto' | 'us' | 'cn' | 'hk' | 'futures' | 'global'
+export type MarketId = 'crypto' | 'us' | 'cn' | 'hk' | 'ru' | 'futures' | 'global'
 
-export const MARKET_IDS: readonly MarketId[] = ['crypto', 'us', 'cn', 'hk', 'futures', 'global']
+export const MARKET_IDS: readonly MarketId[] = ['crypto', 'us', 'cn', 'hk', 'ru', 'futures', 'global']
 
 /** market → Context 服务键（@dshtrading/api 的 Context 增强）。 */
 export const MARKET_SERVICE_KEYS: Record<MarketId, string> = {
@@ -66,6 +66,7 @@ export const MARKET_SERVICE_KEYS: Record<MarketId, string> = {
   us: 'tradingUsMarketData',
   cn: 'tradingCnMarketData',
   hk: 'tradingHkMarketData',
+  ru: 'tradingRuMarketData',
   futures: 'tradingFuturesMarketData',
   global: 'tradingGlobalMarketData',
 }
@@ -877,6 +878,8 @@ function isHoldingMarket(value: string): value is HoldingMarket {
 
 /** 动态标的全集缓存 TTL（30分钟）。 */
 export const SYMBOLS_CACHE_TTL_MS = 30 * 60 * 1000
+/** Bounded UI catalog/search response for the A+ ru market path. */
+export const SYMBOLS_QUERY_LIMIT = 50
 
 /**
  * 动态标的全集缓存条目上限：键 = market，键空间 = 市场全集（当前 6），取全集长度
@@ -1174,39 +1177,36 @@ export class TradingBridge {
     return [chosen, ...candidates.filter(candidate => candidate !== chosen)]
   }
 
-  /** 动态标的全集（带 30min 进程内缓存；未实现或异常静默回落空列表）。 */
+  /** Dynamic instrument catalog with a bounded ru UI/search response. */
   async symbols(market: string, query?: string): Promise<SymbolsWire> {
-    const service = this.#requireMarketService(market)
+    const id = this.#requireMarketId(market)
+    const service = this.#requireMarketService(id)
     if (typeof service.listInstruments !== 'function') {
       return { symbols: [] }
     }
     const trimmed = query?.trim().toLowerCase()
     if (trimmed) {
       try {
-        const list = await (service as unknown as { listInstruments(q?: string): Promise<InstrumentRef[]> }).listInstruments(trimmed)
+        const list = typeof service.searchInstruments === 'function'
+          ? await service.searchInstruments(trimmed, SYMBOLS_QUERY_LIMIT)
+          : await service.listInstruments()
         let symbols: SymbolInfoWire[] = Array.isArray(list) ? list.map(toSymbolInfoWire) : []
-        // 防御性兜底：若连接器实现未做服务端过滤（忽略 query 返回全量），本地执行严格匹配
-        const isServerFiltered = symbols.length === 0 || symbols.every(s =>
-          s.symbol.toLowerCase().includes(trimmed) || (s.name !== undefined && s.name.toLowerCase().includes(trimmed))
-        )
-        if (!isServerFiltered) {
-          symbols = symbols.filter(s =>
-            s.symbol.toLowerCase().includes(trimmed) || (s.name !== undefined && s.name.toLowerCase().includes(trimmed))
-          )
-        }
+        // Defensive fallback: a provider may ignore query; apply strict local matching.
+        symbols = symbols.filter(s =>
+          s.symbol.toLowerCase().includes(trimmed) || (s.name !== undefined && s.name.toLowerCase().includes(trimmed)),
+        ).slice(0, SYMBOLS_QUERY_LIMIT)
         return { symbols }
       } catch {
         return { symbols: [] }
       }
     }
-    const cached = this.symbolsCache.getFresh(market, Date.now())
-    if (cached !== undefined) {
-      return { symbols: cached }
-    }
+    const cached = this.symbolsCache.getFresh(id, Date.now())
+    if (cached !== undefined) return { symbols: cached }
     try {
       const list = await service.listInstruments()
-      const symbols: SymbolInfoWire[] = Array.isArray(list) ? list.map(toSymbolInfoWire) : []
-      this.symbolsCache.set(market, symbols, Date.now())
+      const allSymbols: SymbolInfoWire[] = Array.isArray(list) ? list.map(toSymbolInfoWire) : []
+      const symbols = id === 'ru' ? allSymbols.slice(0, SYMBOLS_QUERY_LIMIT) : allSymbols
+      this.symbolsCache.set(id, symbols, Date.now())
       return { symbols }
     } catch {
       return { symbols: [] }

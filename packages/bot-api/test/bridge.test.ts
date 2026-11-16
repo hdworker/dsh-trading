@@ -49,6 +49,15 @@ describe('TradingBridge.markets', () => {
   it('零市场安装 → 空清单（headless/无市场包）', () => {
     expect(new TradingBridge(fakeHost({})).markets()).toEqual({ markets: [] })
   })
+
+  it('用户：安装 ru/finam 行情服务后市场清单包含 Finam provider', () => {
+    // Given a host with the ru market-data service installed
+    const bridge = new TradingBridge(fakeHost({ tradingRuMarketData: fakeService() }, { ru: 'finam' }))
+
+    // When the client requests installed markets
+    // Then the bridge exposes the canonical ru market and provider
+    expect(bridge.markets()).toEqual({ markets: [{ id: 'ru', provider: 'finam' }] })
+  })
 })
 
 describe('TradingBridge.tickers', () => {
@@ -309,6 +318,45 @@ describe('TradingBridge.symbols', () => {
     expect(filtered.symbols).toEqual([
       { symbol: 'TSLAUSDT-SWAP', name: 'TSLA/USDT', form: 'perp', assetClass: 'equity' },
     ])
+  })
+
+  it('用户：ru query 使用 typed searchInstruments 并保持 bounded search', async () => {
+    // Given a Finam service with both full-catalog and typed bounded search seams
+    const searches: Array<[string, number | undefined]> = []
+    let listCalls = 0
+    const service = fakeService({
+      listInstruments: async () => {
+        listCalls += 1
+        return [{ symbol: 'WRONG.MOEX', name: 'wrong' }]
+      },
+      searchInstruments: async (query, limit) => {
+        searches.push([query, limit])
+        return [{ symbol: 'SBER.MOEX', name: 'Сбербанк' }]
+      },
+    })
+    const bridge = new TradingBridge(fakeHost({ tradingRuMarketData: service }, { ru: 'finam' }))
+
+    // When the client searches the Finam market
+    const result = await bridge.symbols('ru', 'sber')
+
+    // Then the bridge uses the typed search seam, not an overloaded listInstruments call
+    expect(result.symbols).toEqual([{ symbol: 'SBER.MOEX', name: 'Сбербанк', form: 'spot' }])
+    expect(searches).toEqual([['sber', 50]])
+    expect(listCalls).toBe(0)
+  })
+
+  it('用户：ru full catalog response is bounded for UI while backend service keeps the full universe', async () => {
+    // Given a Finam service whose backend catalog contains more than the UI result cap
+    const rows = Array.from({ length: 60 }, (_, index) => ({ symbol: `S${String(index).padStart(3, '0')}.MOEX`, name: `Asset ${index}` }))
+    const bridge = new TradingBridge(fakeHost({ tradingRuMarketData: fakeService({ listInstruments: async () => rows }) }, { ru: 'finam' }))
+
+    // When the client asks for the initial ru catalog without a query
+    const result = await bridge.symbols('ru')
+
+    // Then only the bounded UI page is returned
+    expect(result.symbols).toHaveLength(50)
+    expect(result.symbols[0]?.symbol).toBe('S000.MOEX')
+    expect(result.symbols[49]?.symbol).toBe('S049.MOEX')
   })
 })
 

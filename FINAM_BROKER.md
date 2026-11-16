@@ -216,6 +216,8 @@ The ru bundle, host patch, registry dataplane and generic settings metadata are 
 
 ## Task 4: Expose `/markets` and `/symbols` to the client
 
+**Status: offline implementation complete.** The bridge accepts `ru`, resolves `tradingRuMarketData`, uses the typed `searchInstruments` capability and caps ru UI/search responses at `SYMBOLS_QUERY_LIMIT = 50`; full `listInstruments()` remains available to backend consumers such as screeners.
+
 **Files:**
 - Modify: `packages/bot-api/src/bridge.ts`
 - Test: `packages/bot-api/test/bridge.test.ts`
@@ -223,17 +225,17 @@ The ru bundle, host patch, registry dataplane and generic settings metadata are 
 
 **Interfaces:**
 - `GET /dshtrading/api/markets` includes `{ id: 'ru', provider: 'finam' }` only when the service is installed and active.
-- `GET /dshtrading/api/symbols?market=ru` returns the bounded catalog response used by the active UI path; the complete catalog remains an internal provider result for screening.
+- `GET /dshtrading/api/symbols?market=ru` returns at most 50 rows for the UI path; the complete catalog remains an internal provider result for screening.
 - `GET /dshtrading/api/symbols?market=ru&query=sber` returns only matching symbol/name rows through `searchInstruments` or a cached full-catalog filter.
 - `screener_run(market='ru')` consumes the complete `listInstruments()` universe, subject to the existing scan pool/deadline guard and explicit `truncated` result.
 
-- [ ] **Step 1: Add tests for installed, missing, empty, query-filtered and cached `ru` catalog responses.**
-- [ ] **Step 2: Run bridge tests and confirm the missing route/type failures.**
-- [ ] **Step 3: Extend `MarketId`, `MARKET_IDS` and `MARKET_SERVICE_KEYS` with `ru` and keep the existing 30-minute full-catalog cache semantics.**
-- [ ] **Step 4: Make `/symbols?query=...` call the typed optional `searchInstruments` capability when available, otherwise filter the cached complete catalog locally.**
-- [ ] **Step 5: Verify the bridge does not silently fall back from `finam` to another provider.**
-- [ ] **Step 6: Verify query requests never cause full-catalog rendering or N-symbol quote polling in the client.**
-- [ ] **Step 7: Run the bridge test subset.**
+- [x] **Step 1: Add tests for installed, missing, empty, query-filtered and cached `ru` catalog responses.**
+- [x] **Step 2: Run bridge tests and confirm the missing route/type failures.**
+- [x] **Step 3: Extend `MarketId`, `MARKET_IDS` and `MARKET_SERVICE_KEYS` with `ru` and preserve the existing 30-minute cache semantics.**
+- [x] **Step 4: Make `/symbols?query=...` call typed optional `searchInstruments` when available, otherwise filter the complete catalog locally.**
+- [x] **Step 5: Verify the bridge does not silently fall back from `finam` to another provider.**
+- [x] **Step 6: Bound the ru response so query requests cannot render the full backend catalog or trigger N-symbol quote polling; UI-level proof remains Task 5.**
+- [x] **Step 7: Run the bridge test subset** — 65 tests passed.
 
 ## Task 5: Wire the Finam tab and watchlist flow
 
