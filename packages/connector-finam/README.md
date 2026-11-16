@@ -13,7 +13,7 @@ Read-only Finam/MOEX market-data connector for the `ru` market.
 
 ## Credentials
 
-The official `@finam/trade-api@2.19.1` SDK is loaded only on the host connector boundary. The default host-side credential reference is `FINAM_API_SECRET`.
+The official `@finam/trade-api@2.24.0` SDK from the Finam release source is loaded only on the host connector boundary. The default host-side credential reference is `FINAM_API_SECRET`.
 
 The secret value must not enter client state, watchlists, URLs, tests or logs. Missing credentials fail with `TRADING_CREDENTIALS_MISSING`.
 
@@ -26,7 +26,7 @@ The adapter uses the official Finam Trade API Node SDK and its gRPC services:
 - `marketData.bars({ symbol, timeframe, interval })` for historical candles;
 - `marketData.subscribeQuote(...)` is available in the upstream SDK, while the first GUI slice uses a bounded REST polling subscription fallback.
 
-The SDK package is pinned to `2.19.1`; the connector deliberately does not advertise `klineCapabilities` until a smoke check verifies timestamp semantics and conservative returned depth.
+The SDK package is pinned to `2.24.0`; the connector deliberately does not advertise `klineCapabilities` until a smoke check verifies timestamp semantics and conservative returned depth.
 
 ## Read-only safety
 

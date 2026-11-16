@@ -19,7 +19,7 @@
 - UI/bridge/backtest never expose Finam native symbols as the canonical stored symbol.
 - First slice is read-only: no `TradeService`, order tools, account balances, positions, fills or live credentials in the UI.
 - Finam credentials are resolved only on the host connector boundary; initial default reference is `FINAM_API_SECRET`; never store secrets in client state, watchlist, URL, tests or logs.
-- Pin the official `@finam/trade-api` SDK version used by the adapter (initial target: `2.19.1`); do not leave the runtime dependency as an unbounded range.
+- Pin the official `@finam/trade-api` SDK version used by the adapter (`2.24.0`, Finam release `2.24.0`); do not leave the runtime dependency as an unbounded range.
 - `listInstruments`, `getTicker`, `getKlines` and `subscribeTicker` must return canonical `ru` symbols.
 - The UI follows mode A+: search/add in the sidebar, while the backend connector keeps a complete active-instrument catalog for `screener_run`; the full catalog is never rendered as a watchlist and is not bulk-quoted by the UI.
 - `listInstruments()` is the full catalog interface; add the optional `searchInstruments?(query: string, limit?: number): Promise<InstrumentRef[]>` capability to the shared market-data interface so the bridge does not rely on an untyped duck-cast.
@@ -139,11 +139,11 @@
 
 ## Task 2: Build the Finam read-only connector
 
-**Status: implementation complete; runtime SDK installation is blocked by upstream package availability.**
+**Status: implementation complete; runtime SDK installation is sourced from the official 2.24.0 release checkout, while public npm remains unavailable.**
 
-The official SDK README and repository source confirm the `@finam/trade-api@2.19.1` interface (`createTradeApi`/`withTradeApi`, `assets.allAssets`, `marketData.lastQuote`, `marketData.bars`). The pinned official checkout at commit `162c579e3ed330722f085dfbda37b961fe8a42c3` was locally generated/type-checked and its exports were verified without copying generated files into this repository. The current npm registry query for that exact package/version returns `ERR_PNPM_FETCH_404`, so the host-runtime install and real network evidence remain pending an accessible published package or approved registry/tarball source.
+The official SDK README and repository source confirm the `@finam/trade-api@2.24.0` interface (`createTradeApi`/`withTradeApi`, `assets.allAssets`, `marketData.lastQuote`, `marketData.bars`). Release commit `c66614fb3fd42970ebedadf0c5664bdcf29e2632` was locally generated/type-checked and packed without copying generated files into this repository. The public npm registry still returns `ERR_PNPM_FETCH_404`; the local release tarball is therefore a host verification artifact, not a portable workspace dependency.
 
-The current code intentionally exposes an active-MISX catalog, not a claimed “tradable equity” universe: the official 2.19.1 proto has no documented `Asset.type` vocabulary or account-free `isTradable` field. Strict equity/tradability filtering remains an explicit acceptance gap.
+The current code intentionally exposes an active-MISX catalog, not a claimed “tradable equity” universe: the official proto has no documented `Asset.type` vocabulary or account-free `isTradable` field. Strict equity/tradability filtering remains an explicit acceptance gap.
 
 **Files:**
 - Create: `packages/connector-finam/package.json`
@@ -166,7 +166,7 @@ The current code intentionally exposes an active-MISX catalog, not a claimed “
 
 - [x] **Step 1: Add parser/transport tests** with fixtures for paginated assets, native `ticker@mic` request payloads (reusing the completed Task 1 mapping), nested decimal values, timestamps, empty pages, duplicate cursors and malformed responses. Typed error mapping is covered separately; HTTP/network smoke remains blocked by SDK availability.
 - [x] **Step 2: Run connector tests to establish the failing REST/service contract; keep the completed symbol mapping tests green.** Direct Vitest execution is green.
-- [ ] **Step 3: Add and install the pinned official `@finam/trade-api@2.19.1` runtime dependency.** The exact declaration is present in `packages/connector-finam/package.json`, but npm/pnpm currently returns `ERR_PNPM_FETCH_404`.
+- [x] **Step 3: Build the pinned official `@finam/trade-api@2.24.0` source checkout.** The exact dependency declaration is present in `packages/connector-finam/package.json`; the release source was built and packed locally. Public npm installation remains blocked by `ERR_PNPM_FETCH_404`.
 - [x] **Step 4: Implement credentials through the host-side ref seam**; resolve `FINAM_API_SECRET` only in host code and never in client/UI modules.
 - [x] **Step 5: Implement bounded asset pagination** using `api.assets.allAssets({ cursor, onlyActive, onlyDisabled })`, canonical mapping, stable cursor guards and active-MISX filtering. Strict equity/tradability filtering remains open because the official proto does not define a safe account-free predicate.
 - [x] **Step 6: Implement ticker/K-line normalization** with exact decimal parsing, official timeframe mapping, provider timestamps, empty response semantics and `TRADING_*` error mapping.

@@ -10,6 +10,10 @@
 
 Критический gap: опубликованный `@finam/trade-api@2.19.1` не обнаружен в публичном npm registry на момент проверки (`GET` возвращает 404), отсутствует в локальных `node_modules`/pnpm-lock/store. Поэтому ниже разделены факты, подтверждённые официальным commit/proto, и то, что нельзя подтвердить без installable tarball или read-only network smoke. Не следует подменять целевой пакет `@finam/grpc-tradeapi`: официальный репозиторий прямо отличает его от Node SDK с клиентом, auth и retry.
 
+## Version decision update: official release 2.24.0
+
+По текущему решению пользователя целевой SDK изменён с initial `2.19.1` на официальный release `2.24.0` (`c66614fb3fd42970ebedadf0c5664bdcf29e2632`). Release содержит только source archive, без npm asset. Для локальной проверки source checkout был сгенерирован на Windows-compatible launcher, typechecked и упакован в `finam-trade-api-2.24.0.tgz`; generated SDK не копируется в dsh-trading. Package declaration в connector обновлена до `@finam/trade-api: 2.24.0`, но перенос между компьютерами требует доступного registry/tarball/bootstrap path.
+
 ## 1. Доступность версии и локальная проверка
 
 ### F-01. Версия 2.19.1 есть в официальном исходнике, но артефакт npm не подтверждён
@@ -261,7 +265,7 @@ There is an official ambiguity: the market-data proto describes 404 as “instru
 ### 9.1 Package and lifecycle
 
 1. Keep current [canonical symbol mapper](../../packages/connector-finam/src/symbol.ts#L1-L54): public `TICKER.MOEX`, connector-native `TICKER@MISX`; do not duplicate mapping.
-2. Keep the exact pinned runtime dependency declaration `@finam/trade-api: 2.19.1`; first prove install and generated declarations in CI once the registry exposes the package. Do not vendor generated SDK files.
+2. Keep the exact pinned runtime dependency declaration `@finam/trade-api: 2.24.0`; the official release source was generated/typechecked and packed locally, but no generated SDK files are vendored. A portable registry/tarball/bootstrap path is still required for CI.
 3. Use a host-only credential resolver for `FINAM_API_SECRET`. Create one long-lived SDK client per connector service/config, cache it behind a promise, and `await api.close()` on service/dataplane dispose. Avoid authenticating once per ticker request.
 4. Do not expose `getToken()` or the raw `TradeApi` object. `sourceAppId` may remain omitted unless Finam gives DSH a documented application id.
 
