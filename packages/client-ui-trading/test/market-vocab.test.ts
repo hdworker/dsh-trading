@@ -26,6 +26,24 @@ describe('inferInputMarket（自选管理添加框的市场推断）', () => {
   })
 })
 
+describe('ru market vocabulary', () => {
+  it('用户：识别 Finam canonical/native input 为 ru', () => {
+    // Given canonical and native MOEX symbol forms
+    // When input market inference runs
+    // Then both forms resolve to the Finam ru market
+    expect(inferInputMarket('SBER.MOEX')).toBe('ru')
+    expect(inferInputMarket('SBER@MISX')).toBe('ru')
+  })
+
+  it('用户：输入 Finam native symbol 时保存 canonical MOEX form', () => {
+    // Given a native Finam symbol and a canonical symbol
+    // When the target market normalizes input
+    // Then no native @MIC value is stored in the client
+    expect(normalizeSymbolInput('ru', 'SBER@MISX')).toBe('SBER.MOEX')
+    expect(normalizeSymbolInput('ru', 'sber.moex')).toBe('SBER.MOEX')
+  })
+})
+
 describe('normalizeSymbolInput', () => {
   it('港股三种输入形一律归一到规范形', () => {
     expect(normalizeSymbolInput('hk', '700')).toBe('00700.HK')

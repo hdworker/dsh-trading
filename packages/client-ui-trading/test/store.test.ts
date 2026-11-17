@@ -71,6 +71,23 @@ describe('createSelectionStore（中栏切图选中标的）', () => {
   })
 })
 
+describe('ru watchlist/selection vocabulary', () => {
+  it('用户：ru selection 与 watchlist 行可持久化 canonical MOEX symbol', () => {
+    // Given an empty ru market with no seed rows
+    const selection = createSelectionStore()
+    const watchlists = createWatchlistStore()
+
+    // When the user selects and adds a canonical Finam instrument
+    const instrument: Instrument = { market: 'ru', symbol: 'SBER.MOEX', name: 'Сбербанк' }
+    selection.select(instrument)
+    watchlists.add('ru', instrument)
+
+    // Then both stores preserve ru and canonical symbol across reload
+    expect(createSelectionStore().getSnapshot().instrument).toEqual(instrument)
+    expect(createWatchlistStore().listFor('ru')).toEqual([instrument])
+  })
+})
+
 describe('createWatchlistStore', () => {
   it('未定制 → 种子列表；add/remove 定制后持久化', () => {
     const store = createWatchlistStore()

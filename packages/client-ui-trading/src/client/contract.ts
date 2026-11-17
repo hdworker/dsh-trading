@@ -15,6 +15,7 @@ export type MarketLocaleKey =
   | 'tab.us'
   | 'tab.cn'
   | 'tab.hk'
+  | 'tab.finam'
   | 'tab.futures'
   | 'tab.global'
   | 'index.spotGold'

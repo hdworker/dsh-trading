@@ -75,6 +75,7 @@ const ORIGIN_BADGE_KEY: Record<PositionOrigin, MarketLocaleKey> = {
 const MARKET_LABEL_KEY: Record<MarketId, MarketLocaleKey> = {
   crypto: 'tab.crypto',
   us: 'tab.us',
+  ru: 'tab.finam',
   cn: 'tab.cn',
   hk: 'tab.hk',
   futures: 'tab.futures',

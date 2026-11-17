@@ -12,6 +12,7 @@ export const MARKET_TAB_KEY: Record<MarketId, MarketLocaleKey> = {
   us: 'tab.us',
   cn: 'tab.cn',
   hk: 'tab.hk',
+  ru: 'tab.finam',
   futures: 'tab.futures',
   global: 'tab.global',
 }
@@ -29,6 +30,7 @@ const CRYPTO_MARKERS = ['USDT', 'USDC', 'BTC', 'ETH']
  */
 export function inferInputMarket(rawDraft: string): MarketId {
   const raw = rawDraft.trim().toUpperCase()
+  if (/^(?:[A-Z0-9]{1,16}\.MOEX|[A-Z0-9]{1,16}@MISX)$/.test(raw)) return 'ru'
   if (/^(HK\.)?\d{1,5}(\.HK)?$/.test(raw)) return 'hk'
   if (/^\d{6}(\.(SH|SZ))?$/.test(raw)) return 'cn'
   if (/^[A-Z]{1,3}\d{2,4}(\.(SHF|DCE|CZC|INE|GFE|CFE))?$/.test(raw)) return 'futures'
@@ -47,6 +49,11 @@ export function normalizeSymbolInput(target: MarketId, rawDraft: string): string
     // 裸数字 / 规范形 00700.HK / Futu 原生形 HK.00700 一律归一到规范形。
     const digits = /^(?:HK\.)?(\d{1,5})(?:\.HK)?$/.exec(raw)?.[1]
     if (digits !== undefined) return `${digits.padStart(5, '0')}.HK`
+  }
+  if (target === 'ru') {
+    const native = /^([A-Z0-9]{1,16})@MISX$/.exec(raw)?.[1]
+    if (native !== undefined) return `${native}.MOEX`
+    if (/^[A-Z0-9]{1,16}\.MOEX$/.test(raw)) return raw
   }
   return raw
 }

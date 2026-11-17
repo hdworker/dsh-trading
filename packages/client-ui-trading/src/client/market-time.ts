@@ -11,6 +11,7 @@ import type { MarketId } from './types.ts'
 export const MARKET_TIMEZONE: Record<MarketId, string | null> = {
   crypto: null,
   us: 'America/New_York',
+  ru: 'Europe/Moscow',
   cn: 'Asia/Shanghai',
   hk: 'Asia/Hong_Kong',
   futures: 'Asia/Shanghai',

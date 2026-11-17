@@ -19,7 +19,9 @@ export interface IntradayRequest {
 
 /** 分钟线候选粒度（按序尝试，首个成功粒度被调用方记住）。crypto 固定 5m。 */
 export function intradayCandidates(market: MarketId): readonly IntradayInterval[] {
-  return market === 'crypto' ? ['5m'] : ['1m', '5m']
+  if (market === 'crypto') return ['5m']
+  if (market === 'ru') return []
+  return ['1m', '5m']
 }
 
 /** 取数上限：1m 覆盖美股常规时段 390 根 + 盘前尾盘余量；5m 约两个交易日。 */

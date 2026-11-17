@@ -29,7 +29,8 @@ const net = vi.hoisted(() => ({
   plan: {} as Record<string, Record<string, 'unsupported' | 'missing' | 'ok'>>,
   /** 粒度 → K 线序列。 */
   series: {} as Record<string, Kline[]>,
-  markets: [] as Array<{ id: 'crypto' | 'us' | 'cn' | 'hk' }>,
+  markets: [] as Array<{ id: 'crypto' | 'us' | 'ru' | 'cn' | 'hk' }>,
+  symbols: [] as Array<{ symbol: string; name?: string }>,
 }))
 
 vi.mock('../src/client/api.ts', async (importOriginal) => {
@@ -38,7 +39,7 @@ vi.mock('../src/client/api.ts', async (importOriginal) => {
     ...actual,
     fetchMarkets: async () => net.markets,
     // 断网桩：全集预取与在线联想一律空，序列完全由 net 决定。
-    fetchSymbols: async () => [],
+    fetchSymbols: async () => net.symbols,
     fetchTickers: async () => ({}),
     fetchKlines: async (market: MarketId, symbol: string, interval: string, limit: number): Promise<Kline[]> => {
       net.calls.push({ market, symbol, interval, limit })
@@ -93,6 +94,7 @@ beforeEach(() => {
   net.plan = {}
   net.series = {}
   net.markets = []
+  net.symbols = []
 })
 
 afterEach(() => {
@@ -219,6 +221,23 @@ describe('MarketSidebar 迷你走势编排冒烟', () => {
     // When: 左栏自选列表渲染完成（市场列表经桥桩到达后才有行）
     // Then: 只有永续行挂「永续」徽标
     await waitFor(() => { expect(view.getAllByText('form.perp')).toHaveLength(1) })
+  })
+
+  it('用户：Finam tab 搜索得到 canonical SBER.MOEX suggestion', async () => {
+    // Given the ru market is installed and the host search returns a canonical Finam row
+    net.markets = [{ id: 'ru' }]
+    net.symbols = [{ symbol: 'SBER.MOEX', name: 'Сбербанк' }]
+    const view = renderSidebar([])
+
+    // When the user opens Finam and types a query
+    await waitFor(() => { expect(view.getByRole('tab', { name: 'tab.finam' })).toBeTruthy() })
+    fireEvent.click(view.getByRole('tab', { name: 'tab.finam' }))
+    const input = view.container.querySelector('input')
+    fireEvent.change(input as HTMLInputElement, { target: { value: 'SBER' } })
+
+    // Then the suggestion displays the canonical symbol and provider name
+    await waitFor(() => { expect(view.getByText('SBER.MOEX')).toBeTruthy() })
+    expect(view.getByText('Сбербанк')).toBeTruthy()
   })
 
   it('crypto 取数归一为 5m×288（滚动 24h，不出现 1m 请求），走势等距铺满', async () => {

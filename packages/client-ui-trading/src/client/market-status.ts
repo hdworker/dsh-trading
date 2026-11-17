@@ -29,6 +29,7 @@ export const MARKET_INDICES: Record<MarketId, MarketIndexDef[]> = {
     { symbol: '^IXIC', nameKey: 'index.nasdaq' },
     { symbol: '^DJI', nameKey: 'index.dowJones' },
   ],
+  ru: [],
   crypto: [
     { symbol: 'BTCUSDT', nameKey: 'index.btc' },
     { symbol: 'ETHUSDT', nameKey: 'index.eth' },

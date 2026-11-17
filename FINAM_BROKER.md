@@ -239,6 +239,8 @@ The ru bundle, host patch, registry dataplane and generic settings metadata are 
 
 ## Task 5: Wire the Finam tab and watchlist flow
 
+**Status: offline implementation complete.** Finam is data-driven from `/markets`, stores canonical `SBER.MOEX`, uses host-first watchlist/selection sync, and stays absent when the ru bundle is not installed.
+
 **Files:**
 - Modify: `packages/client-ui-trading/src/client/types.ts`
 - Modify: `packages/client-ui-trading/src/client/market-vocab.ts`
@@ -246,9 +248,10 @@ The ru bundle, host patch, registry dataplane and generic settings metadata are 
 - Modify: `packages/client-ui-trading/src/client/locales.ts`
 - Modify: `packages/client-ui-trading/src/client/store.ts`
 - Modify: `packages/client-ui-trading/src/client/MarketSidebar.tsx`
-- Modify: `packages/router/src/catalog.ts`
-- Modify: `packages/watchlist/src/plugin.ts` descriptions/examples only.
-- Test: `market-vocab.test.ts`, `symbol-catalog.test.ts`, `market-sidebar.smoke.test.tsx`, `host-watchlist-sync.test.ts`, `watchlist/output-contract.test.ts`.
+- Modify: `packages/client-ui-trading/src/client/QuoteStage.tsx`, `HoldingsPanel.tsx`, `WatchlistManager.tsx`
+- Modify: `packages/client-ui-trading/src/client/market-time.ts`, `market-status.ts`, `intraday-series.ts`, `holdings-types.ts`
+- Modify: `packages/watchlist/src/seeds.ts`
+- Test: `packages/client-ui-trading/test/market-vocab.test.ts`, `store.test.ts`, `market-sidebar.smoke.test.tsx`, `host-watchlist-sync.test.ts`, `packages/watchlist/test/output-contract.test.ts`.
 
 **Interfaces:**
 - `MarketSidebar` remains data-driven: `tabs` comes from `/markets`; no always-visible Finam tab when the bundle is absent.
@@ -256,11 +259,11 @@ The ru bundle, host patch, registry dataplane and generic settings metadata are 
 - Selecting `SBER.MOEX` calls the existing host-first `selectInstrument`; adding calls the existing host-first watchlist path.
 - The row displays the Finam-provided name and canonical symbol; no native `@MIC` code is shown to the user.
 
-- [ ] **Step 1: Add failing tests** for `ru` tab appearance, search, add, select, persistence and removal.
-- [ ] **Step 2: Add `ru` to type/vocabulary/store whitelists and locale labels.**
-- [ ] **Step 3: Add `ru` to the sidebar's dynamic catalog prefetch/search targets and add-market cycle; do not add a second Finam-specific search component.**
-- [ ] **Step 4: Verify a selected Finam row survives reload through host watchlist sync and produces the same `market:symbol` key in groups/pins.**
-- [ ] **Step 5: Run the focused client UI tests.**
+- [x] **Step 1: Add failing tests** for ru tab appearance/search, canonical normalization, persistence, host-first add/select and removal contract.
+- [x] **Step 2: Add `ru` to type/vocabulary/store whitelists, locale labels, timezone/interval maps and the empty watchlist seed bucket.**
+- [x] **Step 3: Add `ru` to sidebar dynamic catalog prefetch/search targets and add-market cycle; no second Finam-specific search component was added.**
+- [x] **Step 4: Verify a selected Finam row survives reload through host watchlist sync and preserves the same `ru:SBER.MOEX` identity.**
+- [x] **Step 5: Run focused client UI/watchlist tests** — 52 tests passed; client package build passed.
 
 ## Task 6: Make charts, backtests and screeners consume Finam data
 

@@ -58,7 +58,7 @@ import { mergeActiveBuyPoints, readActiveBuySnapshots, shanghaiDate, type Active
 /** 本桥支持的市场（与连接器服务键一一对应）。 */
 export type MarketId = 'crypto' | 'us' | 'cn' | 'hk' | 'ru' | 'futures' | 'global'
 
-export const MARKET_IDS: readonly MarketId[] = ['crypto', 'us', 'cn', 'hk', 'ru', 'futures', 'global']
+export const MARKET_IDS: readonly MarketId[] = ['crypto', 'us', 'ru', 'cn', 'hk', 'futures', 'global']
 
 /** market → Context 服务键（@dshtrading/api 的 Context 增强）。 */
 export const MARKET_SERVICE_KEYS: Record<MarketId, string> = {

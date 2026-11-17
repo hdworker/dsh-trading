@@ -45,6 +45,7 @@ const apiMock = vi.hoisted(() => ({
 vi.mock('../src/client/api.ts', () => apiMock)
 
 const AAPL: Instrument = { market: 'us', symbol: 'AAPL', name: '苹果' }
+const SBER: Instrument = { market: 'ru', symbol: 'SBER.MOEX', name: 'Сбербанк' }
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -122,6 +123,26 @@ describe('wireHostWatchlistSync', () => {
     selection.select(AAPL)
     await vi.waitFor(() => { expect(selection.getSnapshot().instrument).toEqual(AAPL) })
     expect(apiMock.putHostSelection).toHaveBeenCalledWith(AAPL)
+  })
+
+  it('用户：ru Finam canonical row follows host-first add/select round-trip', async () => {
+    // Given the ru canonical instrument and a connected host-first sync
+    const watchlists = createWatchlistStore()
+    const selection = createSelectionStore()
+    const groups = createWatchlistGroupsStore()
+    apiMock.addHostWatchlistRow.mockResolvedValue(true)
+    apiMock.putHostSelection.mockResolvedValue(true)
+    wireHostWatchlistSync({ watchlists, selection, groups })
+
+    // When the user adds and selects SBER.MOEX
+    watchlists.add('ru', SBER)
+    await vi.waitFor(() => { expect(apiMock.addHostWatchlistRow).toHaveBeenCalledWith(SBER) })
+    selection.select(SBER)
+
+    // Then the host-first calls preserve ru and the canonical symbol
+    await vi.waitFor(() => { expect(apiMock.putHostSelection).toHaveBeenCalledWith(SBER) })
+    expect(watchlists.getSnapshot().ru).toEqual([SBER])
+    expect(selection.getSnapshot().instrument).toEqual(SBER)
   })
 
   it('变更 host 失败 → 本地不变（fail-closed，SSOT 不劣化）', async () => {

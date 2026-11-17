@@ -68,7 +68,7 @@ export interface HoldingsBookSnapshot {
 }
 
 /** 市场缺省币种推导（§2：crypto→USDT, us→USD, cn→CNY, hk→HKD）。 */
-export const MARKET_DEFAULT_CURRENCY: Record<MarketId, HoldingCurrency> = {
+export const MARKET_DEFAULT_CURRENCY: Partial<Record<MarketId, HoldingCurrency>> = {
   crypto: 'USDT',
   us: 'USD',
   cn: 'CNY',

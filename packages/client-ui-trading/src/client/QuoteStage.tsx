@@ -97,7 +97,7 @@ const TRADE_DESK_POLL_MS = 15000
 // resync 一次，不触发游标翻页、不放大限频消耗；其余市场取 500。日 K 深度需求由
 // 1d 分支单独走 DAILY_LIMIT。
 const KLINE_LIMIT_DEFAULT = 500
-const KLINE_LIMIT_BY_MARKET: Partial<Record<MarketId, number>> = { crypto: 300 }
+const KLINE_LIMIT_BY_MARKET: Partial<Record<MarketId, number>> = { crypto: 300, ru: 365 }
 const klineLimit = (market: MarketId): number => KLINE_LIMIT_BY_MARKET[market] ?? KLINE_LIMIT_DEFAULT
 // 日 K（头部参考 + 日线图表）：750 根 ≈ 三年交易日；OKX 超出单请求 300 的部分由连接器 after 游标翻页补足。
 const DAILY_LIMIT = 750
@@ -170,7 +170,7 @@ function inferMarketFromSymbol(symbol?: string): MarketId | undefined {
 }
 
 /** 信号 reason 的币种符号（按市场；crypto 以 USD 计价近似）。 */
-const CURRENCY_SYMBOL: Record<MarketId, string> = { cn: '¥', hk: 'HK$', us: '$', crypto: '$', futures: '¥', global: '$' }
+const CURRENCY_SYMBOL: Record<MarketId, string> = { cn: '¥', hk: 'HK$', ru: '₽', us: '$', crypto: '$', futures: '¥', global: '$' }
 
 export function QuoteStage({ t, useSelection, useChart, toggleIndicator, setIndicatorParams, setIndicatorVisible, setIndicatorScope, removeIndicator, deleteIndicator, guiSessionId }: QuoteStageProps) {
   const instrument = useSelection(value => value.instrument)
@@ -2098,6 +2098,7 @@ function writeTradeDeskOpen(open: boolean): void {
 const TAB_KEY: Record<MarketId, MarketLocaleKey> = {
   crypto: 'tab.crypto',
   us: 'tab.us',
+  ru: 'tab.finam',
   cn: 'tab.cn',
   hk: 'tab.hk',
   futures: 'tab.futures',

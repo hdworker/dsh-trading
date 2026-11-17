@@ -46,6 +46,23 @@ describe('watchlist output contract', () => {
     expect(await watchlists.list()).toEqual({ us: [] })
   })
 
+  it('用户：watchlist_add 接受 ru canonical row 并返回正常结构化结果', async () => {
+    // Given a real memory store and the registered host-side watchlist tool
+    const watchlists = createMemoryWatchlistStore()
+    const deps = { watchlists, selection: createMemorySelectionStore() }
+    const runtime = await createRuntime()
+    runtime.register(createWatchlistAddTool(deps))
+
+    // When the user adds a Finam canonical symbol
+    const batch = await runtime.execute({ calls: [{ id: 'watchlist_add', name: 'watchlist_add', arguments: JSON.stringify({ market: 'ru', symbol: 'SBER.MOEX', name: 'Сбербанк' }) }], signal: new AbortController().signal })
+
+    // Then the output preserves ru/canonical vocabulary and writes one row
+    const result = batch.results[0]!.result
+    expect(result.isError).toBe(false)
+    expect(result.value).toMatchObject({ ok: true, added: true })
+    expect(await watchlists.list()).toEqual({ ru: [{ market: 'ru', symbol: 'SBER.MOEX', name: 'Сбербанк' }] })
+  })
+
   it('user gets an error without writes for blank instrument arguments', async () => {
     // Given: a real memory store
     const watchlists = createMemoryWatchlistStore()
