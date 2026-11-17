@@ -229,6 +229,25 @@ describe('TradingBridge.klines', () => {
     expect(wire.klines).toHaveLength(1)
   })
 
+  it('用户：ru chart path keeps Finam canonical symbol and daily interval', async () => {
+    // Given a ru/finam market-data service with a canonical-symbol spy
+    const seen: Array<{ symbol: string; interval: string; limit: number | undefined }> = []
+    const service = fakeService({
+      getKlines: async (symbol, interval, limit) => {
+        seen.push({ symbol, interval, limit })
+        return oneBar()
+      },
+    })
+    const bridge = new TradingBridge(fakeHost({ tradingRuMarketData: service }, { ru: 'finam' }))
+
+    // When the chart asks for SBER.MOEX daily candles
+    const wire = await bridge.klines('ru', 'SBER.MOEX', '1d', '365')
+
+    // Then the standard chart path reaches the same canonical service
+    expect(wire.klines).toHaveLength(1)
+    expect(seen).toEqual([{ symbol: 'SBER.MOEX', interval: '1d', limit: 365 }])
+  })
+
   it('非法 limit → 400；未安装市场 → 400', async () => {
     const bridge = new TradingBridge(fakeHost({ tradingHkMarketData: fakeService() }))
     await expect(bridge.klines('hk', '00700', '1w', '0')).rejects.toThrowError(/limit/)

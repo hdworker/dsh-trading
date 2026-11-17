@@ -108,6 +108,24 @@ describe('screener_run', () => {
     expect(truncated.results).toHaveLength(50)
   })
 
+  it('用户：ru screener 使用完整 Finam catalog 并保留 safety cap/truncated metadata', async () => {
+    // Given a complete Finam-like canonical catalog larger than the scanner cap
+    const many = Array.from({ length: 600 }, (_, i) => ({ symbol: `S${i}.MOEX`, name: `Finam ${i}` }))
+
+    // When the read-only ru service is scanned with a wide pool request
+    const wire = JSON.parse(String(await makeTool({
+      active: () => ({ provider: 'finam', service: service({ symbols: many }) }),
+    }).execute({ screenerId: 'scr.near-high', market: 'ru', limit: 600 }))) as RunWire
+
+    // Then the full backend universe is reported while the existing cap/truncation remains visible
+    expect(wire.provider).toBe('finam')
+    expect(wire.universeSize).toBe(600)
+    expect(wire.scanPool).toBe(500)
+    expect(wire.scanned).toBe(500)
+    expect(wire.returned).toBe(50)
+    expect(wire.truncated).toBe(true)
+  })
+
   it('paramsJson 覆盖参数并回显 effective（clamp 生效）', async () => {
     const wire = JSON.parse(String(await makeTool().execute({
       screenerId: 'scr.near-high', market: 'us', paramsJson: '{"withinPct":9999}',

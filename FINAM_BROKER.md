@@ -267,10 +267,12 @@ The ru bundle, host patch, registry dataplane and generic settings metadata are 
 
 ## Task 6: Make charts, backtests and screeners consume Finam data
 
+**Status: offline implementation complete.** Existing chart/backtest/screener engines now consume the same ru market-data resolver; no Finam-specific engine or execution path was added.
+
 **Files:**
 - Modify if required: `packages/strategies/src/plugin.ts`
-- Test: `packages/strategies/test/market-data-resolver.test.ts` or existing backtest test.
-- Test: `packages/client-ui-trading/test/market-sidebar.smoke.test.tsx` or chart-stage bridge test.
+- Test: `packages/strategies/test/market-data-resolver.test.ts`, `plugin.test.ts`, `backtest-params.test.ts`, `screener-run.test.ts`.
+- Test: `packages/client-ui-trading/test/market-sidebar.smoke.test.tsx` and chart-stage path.
 - Test: `packages/bot-api/test/bridge.test.ts` for `/klines?market=ru`.
 
 **Interfaces:**
@@ -279,11 +281,11 @@ The ru bundle, host patch, registry dataplane and generic settings metadata are 
 - Screener path: `screener_run({ market: 'ru', ... })` → complete Finam `listInstruments()` universe → bounded per-symbol `getKlines(symbol, '1d', ...)` → existing pure screener evaluator; output preserves `scanned`, `failed`, `truncated` and deadline semantics.
 - Provider/source metadata remains available in bridge responses where the existing contract already exposes it.
 
-- [ ] **Step 1: Add a fake Finam service to prove chart klines and strategy backtest resolve the same canonical symbol.**
-- [ ] **Step 2: Verify no execution service is required for chart/backtest operation.**
-- [ ] **Step 3: Verify `TRADING_UNSUPPORTED_INTERVAL`, `TRADING_SYMBOL_NOT_FOUND`, empty bars and rate-limit errors remain distinguishable.**
-- [ ] **Step 4: Verify `screener_run(market='ru')` uses the full catalog without rendering or bulk-quoting it; safety caps and truncation are visible to the caller.**
-- [ ] **Step 5: Run strategy, screener and bridge tests.**
+- [x] **Step 1: Add a fake Finam service to prove chart klines and strategy backtest resolve the same canonical symbol.**
+- [x] **Step 2: Verify no execution service is required for chart/backtest operation.**
+- [x] **Step 3: Verify `TRADING_UNSUPPORTED_INTERVAL`, `TRADING_SYMBOL_NOT_FOUND`, empty bars and rate-limit errors remain distinguishable** in connector normalization tests.
+- [x] **Step 4: Verify `screener_run(market='ru')` uses the full catalog without rendering or bulk-quoting it; safety caps and truncation are visible to the caller.**
+- [x] **Step 5: Run strategy, screener and bridge tests** — strategy subset 20 tests and bridge suite 63 tests passed.
 
 ## Task 7: Begin the full broker-integration path
 

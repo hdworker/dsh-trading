@@ -56,6 +56,7 @@ const MARKET_SERVICE_KEYS: Record<string, string> = {
   us: 'tradingUsMarketData',
   cn: 'tradingCnMarketData',
   hk: 'tradingHkMarketData',
+  ru: 'tradingRuMarketData',
 }
 
 /** 默认存储路径：$DSH_HOME/strategies/custom.json（缺省 ~/.dsh）。 */
